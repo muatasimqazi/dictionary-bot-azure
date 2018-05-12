@@ -5,13 +5,14 @@ A simple echo bot for the Microsoft Bot Framework.
 var restify = require('restify');
 var builder = require('botbuilder');
 var botbuilder_azure = require("botbuilder-azure");
+var sheetrock = require('sheetrock');
 
 // Setup Restify Server
 var server = restify.createServer();
 server.listen(process.env.port || process.env.PORT || 3978, function () {
-   console.log('%s listening to %s', server.name, server.url); 
+    console.log('%s listening to %s', server.name, server.url);
 });
-  
+
 // Create chat connector for communicating with the Bot Framework Service
 var connector = new builder.ChatConnector({
     appId: process.env.MicrosoftAppId,
@@ -32,10 +33,31 @@ var tableName = 'botdata';
 var azureTableClient = new botbuilder_azure.AzureTableClient(tableName, process.env['AzureWebJobsStorage']);
 var tableStorage = new botbuilder_azure.AzureBotStorage({ gzipData: false }, azureTableClient);
 
+
+var messageText = "";
+var myCallback = function (error, options, response) {
+    if (!error) {
+        /*
+          Parse response.data, loop through response.rows, or do something with
+          response.html.
+        */
+        var word_list = response.rows[1];
+
+        messageText = word_list.cellsArray[0];
+
+    }
+};
+
+sheetrock({
+    url: "https://docs.google.com/spreadsheets/d/1qT1LyvoAcb0HTsi2rHBltBVpUBumAUzT__rhMvrz5Rk/edit#gid=0",
+    query: "select A,B,C,D,E,L where E = 'Both' order by L desc",
+    callback: myCallback
+});
+
 // Create your bot with a function to receive messages from the user
 var bot = new builder.UniversalBot(connector);
 bot.set('storage', tableStorage);
 
 bot.dialog('/', function (session) {
-    session.send('You said this: ' + session.message.text);
+    session.send('You said this: ' + messageText);
 });

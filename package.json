@@ -14,7 +14,8 @@
     "botbuilder-azure": "^3.0.4",
     "fs": "0.0.1-security",
     "path": "^0.12.7",
-    "restify": "^5.0.0"
+    "restify": "^5.0.0",
+    "sheetrock": "^1.1.4"
   },
   "devDependencies": {
     "request": "^2.85.0",
